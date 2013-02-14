@@ -41,9 +41,9 @@ has 'u'  => (is => 'rw', isa => 'Str');
 has 'repo' => (is => 'rw', isa => 'Str');
 
 has 'is_main_module' => (is => 'ro', isa => 'Bool', default => 0);
+
 sub set_default_user_repo {
     my ($self, $user, $repo) = @_;
-
     $self->u($user);
     $self->repo($repo);
 
@@ -134,7 +134,6 @@ sub query {
         $req->content($json);
     }
     $req->header( 'Content-Length' => length $req->content );
-
     my $res = $ua->request($req);
 
     # Slow down if we're approaching the rate limit
@@ -170,6 +169,8 @@ sub query {
         my @rel_strs = split ',', $res->header('link');
         $self->_extract_link_url(\@rel_strs);
     }
+
+    push(@$data, $self->next_page) if $self->has_next_page;
 
     ## be smarter
     if (wantarray) {
